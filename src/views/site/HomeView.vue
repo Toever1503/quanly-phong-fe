@@ -4,6 +4,7 @@ import { RoomService } from "../../services/RoomService";
 import { message } from "ant-design-vue";
 const hasMouted = ref(false);
 const isAdmin = ref(false);
+const hasLogged = ref(false);
 const data = ref([]);
 const pageConfig = ref({
   current: 1,
@@ -23,9 +24,15 @@ const getRooms = () => {
 
 onMounted(() => {
   hasMouted.value = true;
-  isAdmin.value = localStorage.getItem("roles").indexOf("ROLE_ADMIN") !== -1;
-  getRooms();
-
+  if(localStorage.getItem("token") !== null)
+  {
+    isAdmin.value = localStorage.getItem("roles").indexOf("ROLE_ADMIN") !== -1;
+    hasLogged.value=true;
+    getRooms();
+  }
+  else {
+    window.location.replace("/sign-in");
+  }
 });
 
 const rentRoom = (item) => {
@@ -45,6 +52,15 @@ const rentRoom = (item) => {
   }
 }
 
+const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("roles");
+  message.success('Logout successfully!');
+  setTimeout(() => {
+    window.location.reload();
+  }, 300);
+}
+
 </script>
 
 <template>
@@ -57,6 +73,9 @@ const rentRoom = (item) => {
         <a-button v-if="hasMouted && isAdmin" key="1" type="link" href="/admin">
           Manage room
         </a-button>
+
+        <a-button v-if="hasLogged" @click="logout" class="ml-2" type="primary">Logout</a-button>
+
       </template>
     </a-page-header>
 

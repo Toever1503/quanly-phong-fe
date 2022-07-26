@@ -2,11 +2,12 @@
 
   <div class="p-10">
     <a-page-header
-      style="border: 1px solid rgb(235, 237, 240)"
-      title="Danh sach phong"
+        style="border: 1px solid rgb(235, 237, 240)"
+        title="Danh sach phong"
     >
       <template #tags>
         <a-button key="1" type="primary" @click="openModal('add')">Add new</a-button>
+        <a-button v-if="hasLogged" @click="logout" class="ml-2" type="primary">Logout</a-button>
       </template>
     </a-page-header>
 
@@ -20,43 +21,43 @@
              :confirmLoading="formLoading"
     >
       <a-form
-        ref="formRef"
-        :model="formState"
-        :label-col="{ span: 8 }"
-        :wrapper-col="{ span: 16 }"
-        autocomplete="off"
+          ref="formRef"
+          :model="formState"
+          :label-col="{ span: 8 }"
+          :wrapper-col="{ span: 16 }"
+          autocomplete="off"
       >
         <a-form-item
-          label="Room Name"
-          name="roomName"
-          :rules="[{ required: true, message: 'Please input room name!' }]"
+            label="Room Name"
+            name="roomName"
+            :rules="[{ required: true, message: 'Please input room name!' }]"
         >
-          <a-input v-model:value="formState.roomName" />
+          <a-input v-model:value="formState.roomName"/>
         </a-form-item>
 
         <a-form-item
-          label="Description"
-          name="roomDescription"
-          :rules="[{ required: true, message: 'Please input description!' }]"
+            label="Description"
+            name="roomDescription"
+            :rules="[{ required: true, message: 'Please input description!' }]"
         >
-          <a-input v-model:value="formState.roomDescription" />
+          <a-input v-model:value="formState.roomDescription"/>
         </a-form-item>
 
         <a-form-item
-          label="Price"
-          name="roomPrice"
-          :rules="[{ required: true, message: 'Please input room price!' }]"
+            label="Price"
+            name="roomPrice"
+            :rules="[{ required: true, message: 'Please input room price!' }]"
         >
-          <a-input type="number" v-model:value="formState.roomPrice" />
+          <a-input type="number" v-model:value="formState.roomPrice"/>
         </a-form-item>
 
         <a-form-item
-          label="Image"
-          name="roomImage"
+            label="Image"
+            name="roomImage"
         >
           <img v-show="formState.image || formState.data"
                :src="formState.roomImage ? formState.roomImage :  formState.data" style="height: 90px; width: 63px">
-          <a-input @change="onClickFile" ref="inputField" type="file" />
+          <a-input @change="onClickFile" ref="inputField" type="file"/>
         </a-form-item>
 
       </a-form>
@@ -83,9 +84,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { message } from "ant-design-vue";
-import { RoomService } from "../../services/RoomService";
+import {ref, onMounted} from "vue";
+import {message} from "ant-design-vue";
+import {RoomService} from "../../services/RoomService";
 
 function getBase64(file) {
   return new Promise((resolve, reject) => {
@@ -109,6 +110,7 @@ const formState = ref({
   data: "",
   roomImage: null
 });
+const hasLogged = ref(false);
 const inputField = ref();
 const columns = ref([
   {
@@ -198,11 +200,11 @@ const okModal = () => {
     }
 
   })
-    .catch((err) => {
-      console.log("error!", err);
-      message.error("Please input all required fields.");
-      formLoading.value = false;
-    });
+      .catch((err) => {
+        console.log("error!", err);
+        message.error("Please input all required fields.");
+        formLoading.value = false;
+      });
 };
 const cancelModal = () => {
   formVisible.value = false;
@@ -248,9 +250,24 @@ const showEditRoomForm = (record) => {
   formVisible.value = true;
 };
 
+const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("roles");
+
+  message.success('Logout successfully!');
+  setTimeout(() => {
+    window.location.reload();
+  }, 300);
+}
+
 onMounted(() => {
   console.log(`the component is now mounted.`);
-  getRooms();
+  if (localStorage.getItem("token") !== null) {
+    hasLogged.value = true;
+    getRooms();
+  } else {
+    window.location.replace("/sign-in");
+  }
 });
 
 
